@@ -1,5 +1,5 @@
 {
-  "name": "party-governance",
+  "name": "@partyswap-libs/party-governance",
   "version": "1.0.0",
   "description": "",
   "main": "truffle-config.js",
