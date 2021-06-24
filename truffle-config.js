@@ -14,16 +14,16 @@ module.exports = {
       provider: function () {
         return new HDWalletProvider({
           mnemonic,
-          providerOrUrl: `https://avalanche--fuji--rpc.datahub.figment.io/apikey/${APIKEY}/ext/bc/C/rpc`,
+          // providerOrUrl: `https://avalanche--fuji--rpc.datahub.figment.io/apikey/${APIKEY}/ext/bc/C/rpc`,
+          providerOrUrl: `https://api.avax-test.network/ext/bc/C/rpc`,
           chainId: "0xa869"
         })
       },
       network_id: "*",
       gas: 8000000,
-      gasPrice: 470000000000,
+      gasPrice: 490000000000,
       skipDryRun: true,
-      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      networkCheckTimeout: 5000000,
+      timeoutBlocks: 70,  // # of blocks before a deployment times out  (minimum/default: 50)
     },
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
