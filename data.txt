@@ -25,3 +25,37 @@
   > gas price:           225 gwei
   > value sent:          0 ETH
   > total cost:          0.968579775 ETH
+
+
+  for PUPU TOKEN
+
+  2_deploy_contracts.js
+=====================
+
+   Replacing 'TreasuryVester'
+   --------------------------
+   > transaction hash:    0xbdb722a0a92596333135e3188f4e685bb1111b8ead6bebece15317973b38e1c5
+   > Blocks: 1            Seconds: 8
+   > contract address:    0x898aFFBdC48d5A7A072a50A8250b424c982e2608
+   > block number:        2552383
+   > block timestamp:     1625349906
+   > account:             0x3b73F15142945f260148aDa3Db15b0657D12831C
+   > balance:             2.830564175
+   > gas used:            1041565 (0xfe49d)
+   > gas price:           225 gwei
+   > value sent:          0 ETH
+   > total cost:          0.234352125 ETH
+   
+   Replacing 'LiquidityPoolManager'
+   --------------------------------
+   > transaction hash:    0x2fb8adcec0daf50eb9432d408605d420f7af9433ac711df88280e23a07662b81
+   > Blocks: 0            Seconds: 4
+   > contract address:    0x199E962dD7635597c6D965d636C08Fe34F30805c
+   > block number:        2552384
+   > block timestamp:     1625349915
+   > account:             0x3b73F15142945f260148aDa3Db15b0657D12831C
+   > balance:             1.8619844
+   > gas used:            4304799 (0x41af9f)
+   > gas price:           225 gwei
+   > value sent:          0 ETH
+   > total cost:          0.968579775 ETH
