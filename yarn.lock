@@ -1170,10 +1170,10 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.1.0.tgz#baec89a7f5f73e3d8ea582a78f1980134b605375"
   integrity sha512-TihZitscnaHNcZgXGj9zDLDyCqjziytB4tMCwXq0XimfWkAjBYyk5/pOsDbbwcavhlc79HhpTEpQcrMnPVa1mw==
 
-"@partyswap-libs/party-swap-core@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@partyswap-libs/party-swap-core/-/party-swap-core-0.1.0.tgz#53c262ceef64cfa04cfa81cc553210a273a9f268"
-  integrity sha512-A71Z+4fpUagKtyLLwSuq72RTai6/bnXpL61NlR36ELBgz3I2CrL7ZZL5fyKTIw8f6n668gCYPO79betZnr9oJw==
+"@partyswap-libs/party-swap-core@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@partyswap-libs/party-swap-core/-/party-swap-core-0.1.2.tgz#3b6daa985e601ed503a59e78dce3a10a3bbffac1"
+  integrity sha512-nyaGO/BTcVw2OpSUXzjH/XuSb+7rB0MWptN5M5vuuJIszJaukStQVR8j2r76r17Jgmenpj1mLpKm2QA+iG5Nxg==
   dependencies:
     "@truffle/hdwallet-provider" "^1.4.0"
     dotenv "^10.0.0"
