@@ -15,9 +15,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
     "@partyswap-libs/party-swap-core": "^0.1.2",
-    "@truffle/hdwallet-provider": "^1.4.0",
     "dotenv": "^10.0.0",
     "openzeppelin-solidity": "^4.1.0",
-    "truffle-contract-size": "^2.0.1"
   }
 }
