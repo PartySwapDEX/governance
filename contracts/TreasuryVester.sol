@@ -18,7 +18,7 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
 
     // Amount to distribute at each interval in wei
     // 16,450 YAY
-    uint256 public vestingAmount = 164_500_000_000_000;
+    uint256 public vestingAmount = 16_450_000_000_000_000_000_000;
 
     // Interval to distribute in seconds
     uint256 public vestingCliff = 86_400;
@@ -38,7 +38,7 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
 
     // Amount of YAY required to start distributing denominated in wei
     // Should be 48,125,000 YAY
-    uint256 public startingBalance = 481_250_000_000_000_000;
+    uint256 public startingBalance = 48_125_000_000_000_000_000_000_000;
 
     event VestingEnabled();
     event TokensVested(uint256 amount, address recipient);
