@@ -1,11 +1,11 @@
 const TreasuryVester = artifacts.require("TreasuryVester");
 const LiquidityPoolManager = artifacts.require("LiquidityPoolManager");
-const YAY = '0xEbD7fF328bC30087720e427CB8f11E9Bd8aF7d8A';
+const YAY = '0x15957be9802B50c6D66f58a99A2a3d73F5aaf615';
 
 module.exports = function (deployer) {
   deployer.deploy(TreasuryVester, YAY).then(
     () => {
-      const WAVAX = '0xd00ae08403B9bbb9124bB305C09058E32C39A48c';
+      const WAVAX = '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7';
       return deployer.deploy(LiquidityPoolManager, WAVAX, YAY, TreasuryVester.address)
     }
   );

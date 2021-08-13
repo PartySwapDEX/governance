@@ -4,39 +4,47 @@ Replacing 'TreasuryVester'
 
 ---
 
-- transaction hash: 0x28c3b734e15656827327b07fb15ca45a1030479e13888f84af1cc91f23240d05
-- Blocks: 0 Seconds: 4
-- contract address: 0x5151481e2971d0B93Eb4f04d5c26341f35cED721
-- block number: 2804154
-- block timestamp: 1627525371
+- transaction hash: 0x40972b7a4f26abe833427dc924bf3b9823970f6e88cf71293a7cde8c635a369c
+- Blocks: 2 Seconds: 8
+- contract address: 0xEbafdbA92D3131A51982Fc3F4F8ee922e005aA89
+- block number: 2967233
+- block timestamp: 1628816920
 - account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
-- balance: 12.006375613435125385
-- gas used: 1041565 (0xfe49d)
+- balance: 13.731249604419404813
+- gas used: 1041629 (0xfe4dd)
 - gas price: 225 gwei
 - value sent: 0 ETH
-- total cost: 0.234352125 ETH
+- total cost: 0.234366525 ETH
 
 Replacing 'LiquidityPoolManager'
 
 ---
 
-- transaction hash: 0x4ea28041bf1ce9ce35e8fbbc5adb876ad95b765dcab3be7dd052974ab85e7710
-- Blocks: 2 Seconds: 8
-- contract address: 0xB4cC12638ACDF03f1F89e6bB5097B17592Ff6eF2
-- block number: 2804157
-- block timestamp: 1627525382
+- transaction hash: 0x422c369732d94679f92c8ab5d89e656bad6d17a679920d74a1dbc44d5c8b0a1e
+- Blocks: 0 Seconds: 4
+- contract address: 0x72798DaA24590643B0A4E36a6919989d1Aa5cb37
+- block number: 2967234
+- block timestamp: 1628816929
 - account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
-- balance: 11.037795838435125385
+- balance: 12.762669829419404813
 - gas used: 4304799 (0x41af9f)
 - gas price: 225 gwei
 - value sent: 0 ETH
 - total cost: 0.968579775 ETH
 
+- Saving migration to chain.
+- Saving artifacts
+
 ---
 
-- Total cost: 1.2029319 ETH
+- Total cost: 1.2029463 ETH
 
----
+# Summary
+
+- Total deployments: 3
+- Final cost: 1.2398436 ETH
+
+===========================
 
 # FUJI
 
