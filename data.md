@@ -54,42 +54,30 @@ Replacing 'TreasuryVester'
 
 ---
 
-- transaction hash: 0x729e6f3158ba31a96b9a57f4e31793c3c311eafa743d0187348d11eef3baaf41
-- Blocks: 2 Seconds: 4
-- contract address: 0x269bb0AA43685DD5A405486EC03Cd7f94061c003
-- block number: 750859
-- block timestamp: 1628805781
+- transaction hash: 0xb9ce0bc20e15c95456ecdc038e2da58c1aa1c97ef2b20ac61c213ad063df14b6
+- Blocks: 0 Seconds: 4
+- contract address: 0x3eF57d246E14fD7d2967bF7E940A10aE094930C3
+- block number: 851454
+- block timestamp: 1629655631
 - account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
-- balance: 8.841945800000000002
-- gas used: 1041617 (0xfe4d1)
+- balance: 19.694181293904306
+- gas used: 1042085 (0xfe6a5)
 - gas price: 225 gwei
 - value sent: 0 ETH
-- total cost: 0.234363825 ETH
+- total cost: 0.234469125 ETH
 
 Replacing 'LiquidityPoolManager'
 
 ---
 
-- transaction hash: 0xfe0caa1046724146f2044c839dffad3ce8396818e7419ee83f398507769af313
-- Blocks: 2 Seconds: 4
-- contract address: 0x4c80a41c7E7F30778230110dCE0D84EC60edB323
-- block number: 750861
-- block timestamp: 1628805788
+- transaction hash: 0xca7cd941569f2a5774abaf269a3d19af7c5d8dcc0857d2d2fbbf24538570d3fa
+- Blocks: 0 Seconds: 4
+- contract address: 0xd040e0A2268389f7110E194197F1eD97F586ebBF
+- block number: 851455
+- block timestamp: 1629655641
 - account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
-- balance: 7.873368725000000002
-- gas used: 4304787 (0x41af93)
+- balance: 18.724230818904306
+- gas used: 4310891 (0x41c76b)
 - gas price: 225 gwei
 - value sent: 0 ETH
-- total cost: 0.968577075 ETH
-
-- Saving migration to chain.
-- Saving artifacts
-
----
-
-- Total cost: 1.2029409 ETH
-
-# Summary
-
-- Total deployments: 3
-- Final cost: 1.2398382 ETH
+- total cost: 0.969950475 ETH

@@ -7,17 +7,17 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
- * Contract to control the release of YAY.
+ * Contract to control the release of PARTY.
  */
 contract TreasuryVester is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    address public yay;
+    address public party;
     address public recipient;
 
     // Amount to distribute at each interval in wei
-    // 16,450 YAY
+    // 16,450 PARTY
     uint256 public vestingAmount = 16_450_000_000_000_000_000_000;
 
     // Interval to distribute in seconds
@@ -36,28 +36,28 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
     // Timestamp of latest distribution
     uint256 public lastUpdate;
 
-    // Amount of YAY required to start distributing denominated in wei
-    // Should be 48,125,000 YAY
+    // Amount of PARTY required to start distributing denominated in wei
+    // Should be 48,125,000 PARTY
     uint256 public startingBalance = 48_125_000_000_000_000_000_000_000;
 
     event VestingEnabled();
     event TokensVested(uint256 amount, address recipient);
     event RecipientChanged(address recipient);
 
-    // YAY Distribution plan:
+    // PARTY Distribution plan:
     // According to the Pangolin Litepaper, we initially will distribute
-    // 175342.465 YAY per day. Vesting period will be 24 hours: 86400 seconds.
+    // 175342.465 PARTY per day. Vesting period will be 24 hours: 86400 seconds.
     // Halving will occur every four years. No leap day. 4 years: 1460 distributions
 
-    constructor(address yay_) {
-        yay = yay_;
+    constructor(address party_) {
+        party = party_;
 
         lastUpdate = 0;
         nextSlash = halvingPeriod;
     }
 
     /**
-     * Enable distribution. A sufficient amount of YAY >= startingBalance must be transferred
+     * Enable distribution. A sufficient amount of PARTY >= startingBalance must be transferred
      * to the contract before enabling. The recipient must also be set. Can only be called by
      * the owner.
      */
@@ -67,8 +67,8 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
             "TreasuryVester::startVesting: vesting already started"
         );
         require(
-            IERC20(yay).balanceOf(address(this)) >= startingBalance,
-            "TreasuryVester::startVesting: incorrect YAY supply"
+            IERC20(party).balanceOf(address(this)) >= startingBalance,
+            "TreasuryVester::startVesting: incorrect PARTY supply"
         );
         require(
             recipient != address(0),
@@ -94,7 +94,7 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
     }
 
     /**
-     * Vest the next YAY allocation. Requires vestingCliff seconds in between calls. YAY will
+     * Vest the next PARTY allocation. Requires vestingCliff seconds in between calls. PARTY will
      * be distributed to the recipient.
      */
     function claim() external nonReentrant returns (uint256) {
@@ -120,7 +120,7 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
         lastUpdate = block.timestamp;
 
         // Distribute the tokens
-        IERC20(yay).safeTransfer(recipient, vestingAmount);
+        IERC20(party).safeTransfer(recipient, vestingAmount);
         emit TokensVested(vestingAmount, recipient);
 
         return vestingAmount;

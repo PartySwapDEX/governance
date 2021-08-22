@@ -8,18 +8,18 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./StakingRewards.sol";
 
 /**
- * Contract to distribute YAY tokens to whitelisted trading pairs. After deploying,
- * whitelist the desired pairs and set the avaxYayPair. When initial administration
+ * Contract to distribute PARTY tokens to whitelisted trading pairs. After deploying,
+ * whitelist the desired pairs and set the avaxPartyPair. When initial administration
  * is complete. Ownership should be transferred to the Timelock governance contract.
  */
 contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeMath for uint256;
 
-    // Whitelisted pairs that offer YAY rewards
-    // Note: AVAX/YAY is an AVAX pair
+    // Whitelisted pairs that offer PARTY rewards
+    // Note: AVAX/PARTY is an AVAX pair
     EnumerableSet.AddressSet private avaxPairs;
-    EnumerableSet.AddressSet private yayPairs;
+    EnumerableSet.AddressSet private partyPairs;
 
     // Maps pairs to their associated StakingRewards contract
     mapping(address => address) public stakes;
@@ -30,40 +30,40 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     // Fields to control potential fee splitting
     bool public splitPools;
     uint256 public avaxSplit;
-    uint256 public yaySplit;
+    uint256 public partySplit;
 
-    // Known contract addresses for WAVAX and YAY
+    // Known contract addresses for WAVAX and PARTY
     address public wavax;
-    address public yay;
+    address public party;
 
-    // AVAX/YAY pair used to determine YAY liquidity
-    address public avaxYayPair;
+    // AVAX/PARTY pair used to determine PARTY liquidity
+    address public avaxPartyPair;
 
-    // TreasuryVester contract that distributes YAY
+    // TreasuryVester contract that distributes PARTY
     address public treasuryVester;
 
     uint256 public numPools = 0;
 
     bool private readyToDistribute = false;
 
-    // Tokens to distribute to each pool. Indexed by avaxPairs then yayPairs.
+    // Tokens to distribute to each pool. Indexed by avaxPairs then partyPairs.
     uint256[] public distribution;
 
-    uint256 public unallocatedYay = 0;
+    uint256 public unallocatedParty = 0;
 
     constructor(
         address wavax_,
-        address yay_,
+        address party_,
         address treasuryVester_
     ) {
         require(
             wavax_ != address(0) &&
-                yay_ != address(0) &&
+                party_ != address(0) &&
                 treasuryVester_ != address(0),
             "LPM::constructor: Arguments can't be the zero address"
         );
         wavax = wavax_;
-        yay = yay_;
+        party = party_;
         treasuryVester = treasuryVester_;
     }
 
@@ -76,11 +76,11 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
      * Return: True if whitelisted
      */
     function isWhitelisted(address pair) public view returns (bool) {
-        return avaxPairs.contains(pair) || yayPairs.contains(pair);
+        return avaxPairs.contains(pair) || partyPairs.contains(pair);
     }
 
     /**
-     * Check if the given pair is a whitelisted AVAX pair. The AVAX/YAY pair is
+     * Check if the given pair is a whitelisted AVAX pair. The AVAX/PARTY pair is
      * considered an AVAX pair.
      *
      * Args:
@@ -93,37 +93,37 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     }
 
     /**
-     * Check if the given pair is a whitelisted YAY pair. The AVAX/YAY pair is
-     * not considered a YAY pair.
+     * Check if the given pair is a whitelisted PARTY pair. The AVAX/PARTY pair is
+     * not considered a PARTY pair.
      *
      * Args:
      *   pair: pair to check
      *
-     * Return: True if whitelisted and pair contains YAY but is not AVAX/YAY pair
+     * Return: True if whitelisted and pair contains PARTY but is not AVAX/PARTY pair
      */
-    function isYayPair(address pair) external view returns (bool) {
-        return yayPairs.contains(pair);
+    function isPartyPair(address pair) external view returns (bool) {
+        return partyPairs.contains(pair);
     }
 
     /**
-     * Sets the AVAX/YAY pair. Pair's tokens must be AVAX and YAY.
+     * Sets the AVAX/PARTY pair. Pair's tokens must be AVAX and PARTY.
      *
      * Args:
-     *   pair: AVAX/YAY pair
+     *   pair: AVAX/PARTY pair
      */
-    function setAvaxYayPair(address avaxYayPair_) external onlyOwner {
+    function setavaxPartyPair(address avaxPartyPair_) external onlyOwner {
         require(
-            avaxYayPair_ != address(0),
-            "LPM::setAvaxYayPair: Pool cannot be the zero address"
+            avaxPartyPair_ != address(0),
+            "LPM::setavaxPartyPair: Pool cannot be the zero address"
         );
-        avaxYayPair = avaxYayPair_;
+        avaxPartyPair = avaxPartyPair_;
     }
 
     /**
      * Adds a new whitelisted liquidity pool pair. Generates a staking contract.
      * Liquidity providers may stake this liquidity provider reward token and
-     * claim YAY rewards proportional to their stake. Pair must contain either
-     * AVAX or YAY. Associates a weight with the pair. Rewards are distributed
+     * claim PARTY rewards proportional to their stake. Pair must contain either
+     * AVAX or PARTY. Associates a weight with the pair. Rewards are distributed
      * to the pair proportionally based on its share of the total weight.
      *
      * Args:
@@ -158,15 +158,15 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         );
 
         // Create the staking contract and associate it with the pair
-        address stakeContract = address(new StakingRewards(yay, pair));
+        address stakeContract = address(new StakingRewards(party, pair));
         stakes[pair] = stakeContract;
 
         weights[pair] = weight;
 
-        // Add as an AVAX or YAY pair
-        if (token0 == yay || token1 == yay) {
+        // Add as an AVAX or PARTY pair
+        if (token0 == party || token1 == party) {
             require(
-                yayPairs.add(pair),
+                partyPairs.add(pair),
                 "LPM::addWhitelistedPool: Pair add failed"
             );
         } else if (token0 == wavax || token1 == wavax) {
@@ -176,8 +176,8 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
             );
         } else {
             // The governance contract can be used to deploy an altered
-            // LiquidityPoolManager if non-AVAX/YAY pools are desired.
-            revert("LPM::addWhitelistedPool: No AVAX or YAY in the pair");
+            // LiquidityPoolManager if non-AVAX/PARTY pools are desired.
+            revert("LPM::addWhitelistedPool: No AVAX or PARTY in the pair");
         }
 
         numPools = numPools.add(1);
@@ -207,9 +207,9 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         stakes[pair] = address(0);
         weights[pair] = 0;
 
-        if (token0 == yay || token1 == yay) {
+        if (token0 == party || token1 == party) {
             require(
-                yayPairs.remove(pair),
+                partyPairs.remove(pair),
                 "LPM::removeWhitelistedPool: Pair remove failed"
             );
         } else {
@@ -236,32 +236,32 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
 
     /**
      * Activates the fee split mechanism. Divides rewards between AVAX
-     * and YAY pools regardless of liquidity. AVAX and YAY pools will
-     * receive a fixed proportion of the pool rewards. The AVAX and YAY
+     * and PARTY pools regardless of liquidity. AVAX and PARTY pools will
+     * receive a fixed proportion of the pool rewards. The AVAX and PARTY
      * splits should correspond to percentage of rewards received for
      * each and must add up to 100. For the purposes of fee splitting,
-     * the AVAX/YAY pool is a YAY pool. This method can also be used to
+     * the AVAX/PARTY pool is a PARTY pool. This method can also be used to
      * change the split ratio after fee splitting has been activated.
      *
      * Args:
      *   avaxSplit: Percent of rewards to distribute to AVAX pools
-     *   yaySplit: Percent of rewards to distribute to YAY pools
+     *   partySplit: Percent of rewards to distribute to PARTY pools
      */
-    function activateFeeSplit(uint256 avaxSplit_, uint256 yaySplit_)
+    function activateFeeSplit(uint256 avaxSplit_, uint256 partySplit_)
         external
         onlyOwner
     {
         require(
-            avaxSplit_.add(yaySplit_) == 100,
+            avaxSplit_.add(partySplit_) == 100,
             "LPM::activateFeeSplit: Split doesn't add to 100"
         );
         require(
-            !(avaxSplit_ == 100 || yaySplit_ == 100),
+            !(avaxSplit_ == 100 || partySplit_ == 100),
             "LPM::activateFeeSplit: Split can't be 100/0"
         );
         splitPools = true;
         avaxSplit = avaxSplit_;
-        yaySplit = yaySplit_;
+        partySplit = partySplit_;
     }
 
     /**
@@ -271,7 +271,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         require(splitPools, "LPM::deactivateFeeSplit: Fee split not activated");
         splitPools = false;
         avaxSplit = 0;
-        yaySplit = 0;
+        partySplit = 0;
     }
 
     /**
@@ -303,17 +303,17 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     }
 
     /**
-     * Calculates the amount of liquidity in the pair. For a YAY pool, the liquidity in the
-     * pair is two times the amount of YAY multiplied by the price of AVAX per YAY. Only
-     * works for YAY pairs.
+     * Calculates the amount of liquidity in the pair. For a PARTY pool, the liquidity in the
+     * pair is two times the amount of PARTY multiplied by the price of AVAX per PARTY. Only
+     * works for PARTY pairs.
      *
      * Args:
-     *   pair: YAY pair to get liquidity in
-     *   conversionFactor: the price of AVAX to YAY
+     *   pair: PARTY pair to get liquidity in
+     *   conversionFactor: the price of AVAX to PARTY
      *
      * Returns: the amount of liquidity in the pool in units of AVAX
      */
-    function getYayLiquidity(address pair, uint256 conversionFactor)
+    function getPartyLiquidity(address pair, uint256 conversionFactor)
         public
         view
         returns (uint256)
@@ -322,13 +322,13 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
 
         uint256 liquidity = 0;
 
-        // add the yay straight up
-        if (IPartyPair(pair).token0() == yay) {
+        // add the party straight up
+        if (IPartyPair(pair).token0() == party) {
             liquidity = liquidity.add(reserve0);
         } else {
             require(
-                IPartyPair(pair).token1() == yay,
-                "LPM::getYayLiquidity: One of the tokens in the pair must be YAY"
+                IPartyPair(pair).token1() == party,
+                "LPM::getPartyLiquidity: One of the tokens in the pair must be PARTY"
             );
             liquidity = liquidity.add(reserve1);
         }
@@ -339,19 +339,23 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     }
 
     /**
-     * Calculates the price of swapping AVAX for 1 YAY
+     * Calculates the price of swapping AVAX for 1 PARTY
      *
-     * Returns: the price of swapping AVAX for 1 YAY
+     * Returns: the price of swapping AVAX for 1 PARTY
      */
-    function getAvaxYayRatio() public view returns (uint256 conversionFactor) {
+    function getAvaxPartyRatio()
+        public
+        view
+        returns (uint256 conversionFactor)
+    {
         require(
-            !(avaxYayPair == address(0)),
-            "LPM::getAvaxYayRatio: No AVAX-YAY pair set"
+            !(avaxPartyPair == address(0)),
+            "LPM::getAvaxPartyRatio: No AVAX-PARTY pair set"
         );
-        (uint256 reserve0, uint256 reserve1, ) =
-            IPartyPair(avaxYayPair).getReserves();
+        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(avaxPartyPair)
+            .getReserves();
 
-        if (IPartyPair(avaxYayPair).token0() == wavax) {
+        if (IPartyPair(avaxPartyPair).token0() == wavax) {
             conversionFactor = quote(reserve1, reserve0);
         } else {
             conversionFactor = quote(reserve0, reserve1);
@@ -359,7 +363,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     }
 
     /**
-     * Determine how the vested YAY allocation will be distributed to the liquidity
+     * Determine how the vested PARTY allocation will be distributed to the liquidity
      * pool staking contracts. Must be called before distributeTokens(). Tokens are
      * distributed to pools based on relative liquidity proportional to total
      * liquidity. Should be called after vestAllocation()/
@@ -370,20 +374,20 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
             "LPM::calculateReturns: Previous returns not distributed. Call distributeTokens()"
         );
         require(
-            unallocatedYay > 0,
-            "LPM::calculateReturns: No YAY to allocate. Call vestAllocation()."
+            unallocatedParty > 0,
+            "LPM::calculateReturns: No PARTY to allocate. Call vestAllocation()."
         );
-        if (yayPairs.length() > 0) {
+        if (partyPairs.length() > 0) {
             require(
-                !(avaxYayPair == address(0)),
-                "LPM::calculateReturns: Avax/YAY Pair not set"
+                !(avaxPartyPair == address(0)),
+                "LPM::calculateReturns: Avax/PARTY Pair not set"
             );
         }
 
         // Calculate total liquidity
         distribution = new uint256[](numPools);
         uint256 avaxLiquidity = 0;
-        uint256 yayLiquidity = 0;
+        uint256 partyLiquidity = 0;
 
         // Add liquidity from AVAX pairs
         for (uint256 i = 0; i < avaxPairs.length(); i++) {
@@ -394,47 +398,58 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
             avaxLiquidity = SafeMath.add(avaxLiquidity, weightedLiquidity);
         }
 
-        // Add liquidity from YAY pairs
-        if (yayPairs.length() > 0) {
-            uint256 conversionRatio = getAvaxYayRatio();
-            for (uint256 i = 0; i < yayPairs.length(); i++) {
-                address pair = yayPairs.at(i);
-                uint256 pairLiquidity = getYayLiquidity(pair, conversionRatio);
+        // Add liquidity from PARTY pairs
+        if (partyPairs.length() > 0) {
+            uint256 conversionRatio = getAvaxPartyRatio();
+            for (uint256 i = 0; i < partyPairs.length(); i++) {
+                address pair = partyPairs.at(i);
+                uint256 pairLiquidity = getPartyLiquidity(
+                    pair,
+                    conversionRatio
+                );
                 uint256 weightedLiquidity = pairLiquidity.mul(weights[pair]);
                 distribution[i + avaxPairs.length()] = weightedLiquidity;
-                yayLiquidity = SafeMath.add(yayLiquidity, weightedLiquidity);
+                partyLiquidity = SafeMath.add(
+                    partyLiquidity,
+                    weightedLiquidity
+                );
             }
         }
 
         // Calculate tokens for each pool
         uint256 transferred = 0;
         if (splitPools) {
-            uint256 avaxAllocatedYay = unallocatedYay.mul(avaxSplit).div(100);
-            uint256 yayAllocatedYay = unallocatedYay.sub(avaxAllocatedYay);
+            uint256 avaxAllocatedParty = unallocatedParty.mul(avaxSplit).div(
+                100
+            );
+            uint256 partyAllocatedParty = unallocatedParty.sub(
+                avaxAllocatedParty
+            );
 
             for (uint256 i = 0; i < avaxPairs.length(); i++) {
-                uint256 pairTokens =
-                    distribution[i].mul(avaxAllocatedYay).div(avaxLiquidity);
+                uint256 pairTokens = distribution[i]
+                    .mul(avaxAllocatedParty)
+                    .div(avaxLiquidity);
                 distribution[i] = pairTokens;
                 transferred = transferred.add(pairTokens);
             }
 
-            if (yayPairs.length() > 0) {
-                for (uint256 i = 0; i < yayPairs.length(); i++) {
-                    uint256 pairTokens =
-                        distribution[i + avaxPairs.length()]
-                            .mul(yayAllocatedYay)
-                            .div(yayLiquidity);
+            if (partyPairs.length() > 0) {
+                for (uint256 i = 0; i < partyPairs.length(); i++) {
+                    uint256 pairTokens = distribution[i + avaxPairs.length()]
+                        .mul(partyAllocatedParty)
+                        .div(partyLiquidity);
                     distribution[i + avaxPairs.length()] = pairTokens;
                     transferred = transferred.add(pairTokens);
                 }
             }
         } else {
-            uint256 totalLiquidity = avaxLiquidity.add(yayLiquidity);
+            uint256 totalLiquidity = avaxLiquidity.add(partyLiquidity);
 
             for (uint256 i = 0; i < distribution.length; i++) {
-                uint256 pairTokens =
-                    distribution[i].mul(unallocatedYay).div(totalLiquidity);
+                uint256 pairTokens = distribution[i].mul(unallocatedParty).div(
+                    totalLiquidity
+                );
                 distribution[i] = pairTokens;
                 transferred = transferred.add(pairTokens);
             }
@@ -443,7 +458,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     }
 
     /**
-     * After token distributions have been calculated, actually distribute the vested YAY
+     * After token distributions have been calculated, actually distribute the vested PARTY
      * allocation to the staking pools. Must be called after calculateReturns().
      */
     function distributeTokens() public nonReentrant {
@@ -458,22 +473,22 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
             if (i < avaxPairs.length()) {
                 stakeContract = stakes[avaxPairs.at(i)];
             } else {
-                stakeContract = stakes[yayPairs.at(i - avaxPairs.length())];
+                stakeContract = stakes[partyPairs.at(i - avaxPairs.length())];
             }
             rewardTokens = distribution[i];
             if (rewardTokens > 0) {
                 require(
-                    IYAY(yay).transfer(stakeContract, rewardTokens),
+                    IPARTY(party).transfer(stakeContract, rewardTokens),
                     "LPM::distributeTokens: Transfer failed"
                 );
                 StakingRewards(stakeContract).notifyRewardAmount(rewardTokens);
             }
         }
-        unallocatedYay = 0;
+        unallocatedParty = 0;
     }
 
     /**
-     * Fallback for distributeTokens in case of gas overflow. Distributes YAY tokens to a single pool.
+     * Fallback for distributeTokens in case of gas overflow. Distributes PARTY tokens to a single pool.
      * distibuteTokens() must still be called once to reset the contract state before calling vestAllocation.
      *
      * Args:
@@ -496,14 +511,16 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         if (pairIndex < avaxPairs.length()) {
             stakeContract = stakes[avaxPairs.at(pairIndex)];
         } else {
-            stakeContract = stakes[yayPairs.at(pairIndex - avaxPairs.length())];
+            stakeContract = stakes[
+                partyPairs.at(pairIndex - avaxPairs.length())
+            ];
         }
 
         uint256 rewardTokens = distribution[pairIndex];
         if (rewardTokens > 0) {
             distribution[pairIndex] = 0;
             require(
-                IYAY(yay).transfer(stakeContract, rewardTokens),
+                IPARTY(party).transfer(stakeContract, rewardTokens),
                 "LPM::distributeTokens: Transfer failed"
             );
             StakingRewards(stakeContract).notifyRewardAmount(rewardTokens);
@@ -524,27 +541,27 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
      * Claim today's vested tokens for the manager to distribute. Moves tokens from
      * the TreasuryVester to the LPM. Can only be called if all
      * previously allocated tokens have been distributed. Call distributeTokens() if
-     * that is not the case. If any additional YAY tokens have been transferred to this
+     * that is not the case. If any additional PARTY tokens have been transferred to this
      * this contract, they will be marked as unallocated and prepared for distribution.
      */
     function vestAllocation() external nonReentrant {
         require(
-            unallocatedYay == 0,
-            "LPM::vestAllocation: Old YAY is unallocated. Call distributeTokens()."
+            unallocatedParty == 0,
+            "LPM::vestAllocation: Old PARTY is unallocated. Call distributeTokens()."
         );
-        unallocatedYay = ITreasuryVester(treasuryVester).claim();
+        unallocatedParty = ITreasuryVester(treasuryVester).claim();
         require(
-            unallocatedYay > 0,
-            "LPM::vestAllocation: No YAY to claim. Try again tomorrow."
+            unallocatedParty > 0,
+            "LPM::vestAllocation: No PARTY to claim. Try again tomorrow."
         );
 
         // Check if we've received extra tokens or didn't receive enough
-        uint256 actualBalance = IYAY(yay).balanceOf(address(this));
+        uint256 actualBalance = IPARTY(party).balanceOf(address(this));
         require(
-            actualBalance >= unallocatedYay,
-            "LPM::vestAllocation: Insufficient YAY transferred"
+            actualBalance >= unallocatedParty,
+            "LPM::vestAllocation: Insufficient PARTY transferred"
         );
-        unallocatedYay = actualBalance;
+        unallocatedParty = actualBalance;
     }
 
     /**
@@ -575,7 +592,7 @@ interface ITreasuryVester {
     function claim() external returns (uint256);
 }
 
-interface IYAY {
+interface IPARTY {
     function balanceOf(address account) external view returns (uint256);
 
     function transfer(address dst, uint256 rawAmount) external returns (bool);
