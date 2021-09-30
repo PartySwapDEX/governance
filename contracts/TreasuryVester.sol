@@ -17,18 +17,19 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
     address public recipient;
 
     // Amount to distribute at each interval in wei
-    // 16,450 PARTY
-    uint256 public vestingAmount = 16_450_000_000_000_000_000_000;
+    // 16,450 x 8 PARTY = 131,600
+    uint256 public vestingAmount = 131_600_000_000_000_000_000_000;
 
     // Interval to distribute in seconds
     uint256 public vestingCliff = 86_400;
 
     // Number of distribution intervals before the distribution amount halves
-    // Halving should occur once every four years (no leap day).
-    // At one distribution per day, that's 365 * 4 = 1460
-    uint256 public halvingPeriod = 1460;
+    // Halving should occur once every month
 
-    // Countdown till the nest halving in seconds
+    // 0.75 period
+    uint256 public halvingPeriod = 30;
+
+    // Countdown till the nest halving in days
     uint256 public nextSlash;
 
     bool public vestingEnabled;
@@ -37,8 +38,8 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
     uint256 public lastUpdate;
 
     // Amount of PARTY required to start distributing denominated in wei
-    // Should be 48,125,000 PARTY
-    uint256 public startingBalance = 48_125_000_000_000_000_000_000_000;
+    // Should be 15,316,779 PARTY
+    uint256 public startingBalance = 15_316_779_000_000_000_000_000_000;
 
     event VestingEnabled();
     event TokensVested(uint256 amount, address recipient);
@@ -111,7 +112,7 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
         // If we've finished a halving period, reduce the amount
         if (nextSlash == 0) {
             nextSlash = halvingPeriod - 1;
-            vestingAmount = vestingAmount / 2;
+            vestingAmount = (vestingAmount * 3) / 4;
         } else {
             nextSlash = nextSlash.sub(1);
         }

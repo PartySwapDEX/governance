@@ -1,4 +1,54 @@
-# MAINNET
+# V2
+
+## MAIN
+
+## FUJI
+
+Replacing 'TreasuryVester'
+
+---
+
+- transaction hash: 0xbcf5c587943a182979f15fe644142f911da378dad7fad3546cad0702953cfe63
+- Blocks: 1 Seconds: 4
+- contract address: 0xDB75611F8b3E39332538d7a82196691EA9237225
+- block number: 1862362
+- block timestamp: 1632971094
+- account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
+- balance: 14.640528438904306
+- gas used: 1050920 (0x100928)
+- gas price: 225 gwei
+- value sent: 0 ETH
+- total cost: 0.236457 ETH
+
+Replacing 'LiquidityPoolManager'
+
+---
+
+- transaction hash: 0x72b0fbd5ccac39c5bed71f894d9d17a317dd6b01b240f39f9e4ed5ef3e420656
+- Blocks: 0 Seconds: 4
+- contract address: 0x101061ac181FEca52A69c569c0601dB6e4dd7098
+- block number: 1862364
+- block timestamp: 1632971103
+- account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
+- balance: 13.670577963904306
+- gas used: 4310891 (0x41c76b)
+- gas price: 225 gwei
+- value sent: 0 ETH
+- total cost: 0.969950475 ETH
+
+- Saving migration to chain.
+- Saving artifacts
+
+---
+
+- Total cost: 1.206407475 ETH
+
+# Summary
+
+- Total deployments: 3
+- Final cost: 1.243304775 ETH
+
+# V1 MAINNET
 
 Replacing 'TreasuryVester'
 
