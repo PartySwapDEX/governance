@@ -20,6 +20,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     // Note: AVAX/PARTY is an AVAX pair
     EnumerableSet.AddressSet private avaxPairs;
     EnumerableSet.AddressSet private partyPairs;
+    EnumerableSet.AddressSet private stableTokenPairs;
 
     // Maps pairs to their associated StakingRewards contract
     mapping(address => address) public stakes;
@@ -31,13 +32,16 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     bool public splitPools;
     uint256 public avaxSplit;
     uint256 public partySplit;
+    uint256 public stableTokenSplit;
 
     // Known contract addresses for WAVAX and PARTY
     address public wavax;
     address public party;
+    address public stableToken;
 
     // AVAX/PARTY pair used to determine PARTY liquidity
     address public avaxPartyPair;
+    address public avaxStableTokenPair;
 
     // TreasuryVester contract that distributes PARTY
     address public treasuryVester;
@@ -54,6 +58,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     constructor(
         address wavax_,
         address party_,
+        address stableToken_,
         address treasuryVester_
     ) {
         require(
@@ -64,6 +69,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         );
         wavax = wavax_;
         party = party_;
+        stableToken = stableToken_;
         treasuryVester = treasuryVester_;
     }
 
@@ -76,7 +82,10 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
      * Return: True if whitelisted
      */
     function isWhitelisted(address pair) public view returns (bool) {
-        return avaxPairs.contains(pair) || partyPairs.contains(pair);
+        return
+            avaxPairs.contains(pair) ||
+            partyPairs.contains(pair) ||
+            stableTokenPairs.contains(pair);
     }
 
     /**
@@ -106,6 +115,19 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     }
 
     /**
+     * Check if the given pair is a whitelisted STABLE TOKEN pair. The AVAX/STABLETOKEN pair is
+     * not considered a STABLETOKEN pair.
+     *
+     * Args:
+     *   pair: pair to check
+     *
+     * Return: True if whitelisted and pair contains PARTY but is not AVAX/PARTY pair
+     */
+    function isStableTokenPair(address pair) external view returns (bool) {
+        return stableTokenPairs.contains(pair);
+    }
+
+    /**
      * Sets the AVAX/PARTY pair. Pair's tokens must be AVAX and PARTY.
      *
      * Args:
@@ -117,6 +139,23 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
             "LPM::setavaxPartyPair: Pool cannot be the zero address"
         );
         avaxPartyPair = avaxPartyPair_;
+    }
+
+    /**
+     * Sets the AVAX/STABLETOKEN pair. Pair's tokens must be AVAX and STABLETOKEN.
+     *
+     * Args:
+     *   pair: AVAX/STABLETOKEN pair
+     */
+    function setavaxStableTokenPair(address avaxStableTokenPair_)
+        external
+        onlyOwner
+    {
+        require(
+            avaxStableTokenPair_ != address(0),
+            "LPM::setavaxStableTokenPair: Pool cannot be the zero address"
+        );
+        avaxStableTokenPair = avaxStableTokenPair_;
     }
 
     /**
@@ -163,7 +202,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
 
         weights[pair] = weight;
 
-        // Add as an AVAX or PARTY pair
+        // Add as an AVAX or PARTY or STABLECOIN pair
         if (token0 == party || token1 == party) {
             require(
                 partyPairs.add(pair),
@@ -174,10 +213,15 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
                 avaxPairs.add(pair),
                 "LPM::addWhitelistedPool: Pair add failed"
             );
+        } else if (token0 == stableToken || token1 == stableToken) {
+            require(
+                stableTokenPairs.add(pair),
+                "LPM::addWhitelistedPool: Pair add failed"
+            );
         } else {
-            // The governance contract can be used to deploy an altered
-            // LiquidityPoolManager if non-AVAX/PARTY pools are desired.
-            revert("LPM::addWhitelistedPool: No AVAX or PARTY in the pair");
+            revert(
+                "LPM::addWhitelistedPool: No AVAX, PARTY or STABLETOKEN in the pair"
+            );
         }
 
         numPools = numPools.add(1);
@@ -212,10 +256,19 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
                 partyPairs.remove(pair),
                 "LPM::removeWhitelistedPool: Pair remove failed"
             );
-        } else {
+        } else if (token0 == wavax || token1 == wavax) {
             require(
                 avaxPairs.remove(pair),
                 "LPM::removeWhitelistedPool: Pair remove failed"
+            );
+        } else if (token0 == stableToken || token1 == stableToken) {
+            require(
+                stableTokenPairs.remove(pair),
+                "LPM::removeWhitelistedPool: Pair remove failed"
+            );
+        } else {
+            revert(
+                "LPM::removeWhitelistedPool: No AVAX, PARTY or STABLETOKEN in the pair"
             );
         }
         numPools = numPools.sub(1);
@@ -246,22 +299,27 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
      * Args:
      *   avaxSplit: Percent of rewards to distribute to AVAX pools
      *   partySplit: Percent of rewards to distribute to PARTY pools
+     *   stableTokenSplit: Percent of rewards to distribute to STABLETOKEN pools
      */
-    function activateFeeSplit(uint256 avaxSplit_, uint256 partySplit_)
-        external
-        onlyOwner
-    {
+    function activateFeeSplit(
+        uint256 avaxSplit_,
+        uint256 partySplit_,
+        uint256 stableTokenSplit_
+    ) external onlyOwner {
         require(
-            avaxSplit_.add(partySplit_) == 100,
+            avaxSplit_.add(partySplit_).add(stableTokenSplit_) == 100,
             "LPM::activateFeeSplit: Split doesn't add to 100"
         );
         require(
-            !(avaxSplit_ == 100 || partySplit_ == 100),
-            "LPM::activateFeeSplit: Split can't be 100/0"
+            !(avaxSplit_ == 100 ||
+                partySplit_ == 100 ||
+                stableTokenSplit_ == 100),
+            "LPM::activateFeeSplit: Split can't be 100/0-0"
         );
         splitPools = true;
         avaxSplit = avaxSplit_;
         partySplit = partySplit_;
+        stableTokenSplit = stableTokenSplit_;
     }
 
     /**
@@ -272,6 +330,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         splitPools = false;
         avaxSplit = 0;
         partySplit = 0;
+        stableTokenSplit = 0;
     }
 
     /**
@@ -338,6 +397,31 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         return liquidity;
     }
 
+    function getStableTokenLiquidity(address pair, uint256 conversionFactor)
+        public
+        view
+        returns (uint256)
+    {
+        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(pair).getReserves();
+
+        uint256 liquidity = 0;
+
+        // add the stableToken straight up
+        if (IPartyPair(pair).token0() == stableToken) {
+            liquidity = liquidity.add(reserve0);
+        } else {
+            require(
+                IPartyPair(pair).token1() == stableToken,
+                "LPM::getStableTokenLiquidity: One of the tokens in the pair must be STABLETOKEN"
+            );
+            liquidity = liquidity.add(reserve1);
+        }
+
+        uint256 oneToken = 1e18;
+        liquidity = liquidity.mul(conversionFactor).mul(2).div(oneToken);
+        return liquidity;
+    }
+
     /**
      * Calculates the price of swapping AVAX for 1 PARTY
      *
@@ -356,6 +440,25 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
             .getReserves();
 
         if (IPartyPair(avaxPartyPair).token0() == wavax) {
+            conversionFactor = quote(reserve1, reserve0);
+        } else {
+            conversionFactor = quote(reserve0, reserve1);
+        }
+    }
+
+    function getAvaxStableTokenRatio()
+        public
+        view
+        returns (uint256 conversionFactor)
+    {
+        require(
+            !(avaxStableTokenPair == address(0)),
+            "LPM::getAvaxPartyRatio: No AVAX-STABLETOKEN pair set"
+        );
+        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(avaxStableTokenPair)
+            .getReserves();
+
+        if (IPartyPair(avaxStableTokenPair).token0() == wavax) {
             conversionFactor = quote(reserve1, reserve0);
         } else {
             conversionFactor = quote(reserve0, reserve1);
@@ -383,11 +486,21 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
                 "LPM::calculateReturns: Avax/PARTY Pair not set"
             );
         }
+        if (stableTokenPairs.length() > 0) {
+            require(
+                !(avaxStableTokenPair == address(0)),
+                "LPM::calculateReturns: Avax/STABLETOKEN Pair not set"
+            );
+        }
 
         // Calculate total liquidity
         distribution = new uint256[](numPools);
         uint256 avaxLiquidity = 0;
         uint256 partyLiquidity = 0;
+        uint256 stableTokenLiquidity = 0;
+
+        uint256 avaxPartyConversionRatio = getAvaxPartyRatio();
+        uint256 avaxStableTokenConversionRatio = getAvaxStableTokenRatio();
 
         // Add liquidity from AVAX pairs
         for (uint256 i = 0; i < avaxPairs.length(); i++) {
@@ -400,17 +513,35 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
 
         // Add liquidity from PARTY pairs
         if (partyPairs.length() > 0) {
-            uint256 conversionRatio = getAvaxPartyRatio();
             for (uint256 i = 0; i < partyPairs.length(); i++) {
                 address pair = partyPairs.at(i);
                 uint256 pairLiquidity = getPartyLiquidity(
                     pair,
-                    conversionRatio
+                    avaxPartyConversionRatio
                 );
                 uint256 weightedLiquidity = pairLiquidity.mul(weights[pair]);
                 distribution[i + avaxPairs.length()] = weightedLiquidity;
                 partyLiquidity = SafeMath.add(
                     partyLiquidity,
+                    weightedLiquidity
+                );
+            }
+        }
+
+        // Add liquidity from STABLETOKEN pairs
+        if (stableTokenPairs.length() > 0) {
+            for (uint256 i = 0; i < stableTokenPairs.length(); i++) {
+                address pair = stableTokenPairs.at(i);
+                uint256 pairLiquidity = getStableTokenLiquidity(
+                    pair,
+                    avaxStableTokenConversionRatio
+                );
+                uint256 weightedLiquidity = pairLiquidity.mul(weights[pair]);
+                distribution[
+                    i + avaxPairs.length() + partyPairs.length()
+                ] = weightedLiquidity;
+                stableTokenLiquidity = SafeMath.add(
+                    stableTokenLiquidity,
                     weightedLiquidity
                 );
             }
@@ -422,9 +553,12 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
             uint256 avaxAllocatedParty = unallocatedParty.mul(avaxSplit).div(
                 100
             );
-            uint256 partyAllocatedParty = unallocatedParty.sub(
-                avaxAllocatedParty
+            uint256 partyAllocatedParty = unallocatedParty.mul(partySplit).div(
+                100
             );
+            uint256 stableTokenAllocatedParty = unallocatedParty
+                .mul(stableTokenSplit)
+                .div(100);
 
             for (uint256 i = 0; i < avaxPairs.length(); i++) {
                 uint256 pairTokens = distribution[i]
@@ -443,8 +577,22 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
                     transferred = transferred.add(pairTokens);
                 }
             }
+
+            if (stableTokenPairs.length() > 0) {
+                for (uint256 i = 0; i < stableTokenPairs.length(); i++) {
+                    uint256 pairTokens = distribution[
+                        i + avaxPairs.length() + partyPairs.length()
+                    ].mul(stableTokenAllocatedParty).div(stableTokenLiquidity);
+                    distribution[
+                        i + avaxPairs.length() + partyPairs.length()
+                    ] = pairTokens;
+                    transferred = transferred.add(pairTokens);
+                }
+            }
         } else {
-            uint256 totalLiquidity = avaxLiquidity.add(partyLiquidity);
+            uint256 totalLiquidity = avaxLiquidity.add(partyLiquidity).add(
+                stableTokenLiquidity
+            );
 
             for (uint256 i = 0; i < distribution.length; i++) {
                 uint256 pairTokens = distribution[i].mul(unallocatedParty).div(
@@ -472,8 +620,17 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < distribution.length; i++) {
             if (i < avaxPairs.length()) {
                 stakeContract = stakes[avaxPairs.at(i)];
-            } else {
+            } else if (
+                i >= avaxPairs.length() &&
+                i < (partyPairs.length() + avaxPairs.length())
+            ) {
                 stakeContract = stakes[partyPairs.at(i - avaxPairs.length())];
+            } else {
+                stakeContract = stakes[
+                    stableTokenPairs.at(
+                        i - avaxPairs.length() - partyPairs.length()
+                    )
+                ];
             }
             rewardTokens = distribution[i];
             if (rewardTokens > 0) {
@@ -510,9 +667,18 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         address stakeContract;
         if (pairIndex < avaxPairs.length()) {
             stakeContract = stakes[avaxPairs.at(pairIndex)];
-        } else {
+        } else if (
+            pairIndex >= avaxPairs.length() &&
+            pairIndex < (avaxPairs.length() + partyPairs.length())
+        ) {
             stakeContract = stakes[
                 partyPairs.at(pairIndex - avaxPairs.length())
+            ];
+        } else {
+            stakeContract = stakes[
+                stableTokenPairs.at(
+                    pairIndex - avaxPairs.length() - partyPairs.length()
+                )
             ];
         }
 
@@ -585,6 +751,20 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         );
         uint256 oneToken = 1e18;
         amountB = SafeMath.div(SafeMath.mul(oneToken, reserveB), reserveA);
+    }
+
+    /**
+     * Sets the treasury vester address.
+     *
+     * Args:
+     *   address: Treasury Vester Address
+     */
+    function setTreasuryVester(address treasuryVester_) external onlyOwner {
+        require(
+            treasuryVester_ != address(0),
+            "LPM::setTreasuryVester: Treasury Vester cannot be the zero address"
+        );
+        treasuryVester = treasuryVester_;
     }
 }
 

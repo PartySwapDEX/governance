@@ -38,8 +38,8 @@ contract TreasuryVester is Ownable, ReentrancyGuard {
     uint256 public lastUpdate;
 
     // Amount of PARTY required to start distributing denominated in wei
-    // Should be 15,316,779 PARTY
-    uint256 public startingBalance = 15_316_779_000_000_000_000_000_000;
+    // Should be 13,015,439 PARTY
+    uint256 public startingBalance = 13_015_439_000_000_000_000_000_000;
 
     event VestingEnabled();
     event TokensVested(uint256 amount, address recipient);
