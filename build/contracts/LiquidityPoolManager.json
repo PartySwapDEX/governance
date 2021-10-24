@@ -65198,13 +65198,12 @@
         }
       },
       "links": {},
-      "address": "0xa0a29Bd6e48C36512894bdDAA08ae6034e1d7211",
-      "transactionHash": "0x920e1d2a543b8490ef4ad6198d962e821caaf6b0bf522f4d462ae66ece96a5d4"
+      "address": "0x3fadb9DfDEfD769dC20020fBCb2Cb7B02F11C627",
+      "transactionHash": "0x1f937a03b23fbed59da0ebd410d211d4296e4ed6aedc5cabbb3772f6c462bd33"
     }
   },
   "schemaVersion": "3.4.1",
-  "updatedAt": "2021-10-14T20:55:17.371Z",
-  "networkType": "ethereum",
+  "updatedAt": "2021-10-18T20:17:41.279Z",
   "devdoc": {
     "kind": "dev",
     "methods": {
