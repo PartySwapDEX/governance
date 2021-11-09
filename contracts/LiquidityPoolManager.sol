@@ -334,138 +334,6 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
     }
 
     /**
-     * Calculates the amount of liquidity in the pair. For an AVAX pool, the liquidity in the
-     * pair is two times the amount of AVAX. Only works for AVAX pairs.
-     *
-     * Args:
-     *   pair: AVAX pair to get liquidity in
-     *
-     * Returns: the amount of liquidity in the pool in units of AVAX
-     */
-    function getAvaxLiquidity(address pair) public view returns (uint256) {
-        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(pair).getReserves();
-
-        uint256 liquidity = 0;
-
-        // add the avax straight up
-        if (IPartyPair(pair).token0() == wavax) {
-            liquidity = liquidity.add(reserve0);
-        } else {
-            require(
-                IPartyPair(pair).token1() == wavax,
-                "LPM::getAvaxLiquidity: One of the tokens in the pair must be WAVAX"
-            );
-            liquidity = liquidity.add(reserve1);
-        }
-        liquidity = liquidity.mul(2);
-        return liquidity;
-    }
-
-    /**
-     * Calculates the amount of liquidity in the pair. For a PARTY pool, the liquidity in the
-     * pair is two times the amount of PARTY multiplied by the price of AVAX per PARTY. Only
-     * works for PARTY pairs.
-     *
-     * Args:
-     *   pair: PARTY pair to get liquidity in
-     *   conversionFactor: the price of AVAX to PARTY
-     *
-     * Returns: the amount of liquidity in the pool in units of AVAX
-     */
-    function getPartyLiquidity(address pair, uint256 conversionFactor)
-        public
-        view
-        returns (uint256)
-    {
-        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(pair).getReserves();
-
-        uint256 liquidity = 0;
-
-        // add the party straight up
-        if (IPartyPair(pair).token0() == party) {
-            liquidity = liquidity.add(reserve0);
-        } else {
-            require(
-                IPartyPair(pair).token1() == party,
-                "LPM::getPartyLiquidity: One of the tokens in the pair must be PARTY"
-            );
-            liquidity = liquidity.add(reserve1);
-        }
-
-        uint256 oneToken = 1e18;
-        liquidity = liquidity.mul(conversionFactor).mul(2).div(oneToken);
-        return liquidity;
-    }
-
-    function getStableTokenLiquidity(address pair, uint256 conversionFactor)
-        public
-        view
-        returns (uint256)
-    {
-        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(pair).getReserves();
-
-        uint256 liquidity = 0;
-
-        // add the stableToken straight up
-        if (IPartyPair(pair).token0() == stableToken) {
-            liquidity = liquidity.add(reserve0);
-        } else {
-            require(
-                IPartyPair(pair).token1() == stableToken,
-                "LPM::getStableTokenLiquidity: One of the tokens in the pair must be STABLETOKEN"
-            );
-            liquidity = liquidity.add(reserve1);
-        }
-
-        uint256 oneToken = 1e18;
-        liquidity = liquidity.mul(conversionFactor).mul(2).div(oneToken);
-        return liquidity;
-    }
-
-    /**
-     * Calculates the price of swapping AVAX for 1 PARTY
-     *
-     * Returns: the price of swapping AVAX for 1 PARTY
-     */
-    function getAvaxPartyRatio()
-        public
-        view
-        returns (uint256 conversionFactor)
-    {
-        require(
-            !(avaxPartyPair == address(0)),
-            "LPM::getAvaxPartyRatio: No AVAX-PARTY pair set"
-        );
-        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(avaxPartyPair)
-            .getReserves();
-
-        if (IPartyPair(avaxPartyPair).token0() == wavax) {
-            conversionFactor = quote(reserve1, reserve0);
-        } else {
-            conversionFactor = quote(reserve0, reserve1);
-        }
-    }
-
-    function getAvaxStableTokenRatio()
-        public
-        view
-        returns (uint256 conversionFactor)
-    {
-        require(
-            !(avaxStableTokenPair == address(0)),
-            "LPM::getAvaxPartyRatio: No AVAX-STABLETOKEN pair set"
-        );
-        (uint256 reserve0, uint256 reserve1, ) = IPartyPair(avaxStableTokenPair)
-            .getReserves();
-
-        if (IPartyPair(avaxStableTokenPair).token0() == wavax) {
-            conversionFactor = quote(reserve1, reserve0);
-        } else {
-            conversionFactor = quote(reserve0, reserve1);
-        }
-    }
-
-    /**
      * Determine how the vested PARTY allocation will be distributed to the liquidity
      * pool staking contracts. Must be called before distributeTokens(). Tokens are
      * distributed to pools based on relative liquidity proportional to total
@@ -499,13 +367,10 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         uint256 partyLiquidity = 0;
         uint256 stableTokenLiquidity = 0;
 
-        uint256 avaxPartyConversionRatio = getAvaxPartyRatio();
-        uint256 avaxStableTokenConversionRatio = getAvaxStableTokenRatio();
-
         // Add liquidity from AVAX pairs
         for (uint256 i = 0; i < avaxPairs.length(); i++) {
             address pair = avaxPairs.at(i);
-            uint256 pairLiquidity = getAvaxLiquidity(pair);
+            uint256 pairLiquidity = 1;
             uint256 weightedLiquidity = pairLiquidity.mul(weights[pair]);
             distribution[i] = weightedLiquidity;
             avaxLiquidity = SafeMath.add(avaxLiquidity, weightedLiquidity);
@@ -515,10 +380,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         if (partyPairs.length() > 0) {
             for (uint256 i = 0; i < partyPairs.length(); i++) {
                 address pair = partyPairs.at(i);
-                uint256 pairLiquidity = getPartyLiquidity(
-                    pair,
-                    avaxPartyConversionRatio
-                );
+                uint256 pairLiquidity = 1;
                 uint256 weightedLiquidity = pairLiquidity.mul(weights[pair]);
                 distribution[i + avaxPairs.length()] = weightedLiquidity;
                 partyLiquidity = SafeMath.add(
@@ -532,10 +394,7 @@ contract LiquidityPoolManager is Ownable, ReentrancyGuard {
         if (stableTokenPairs.length() > 0) {
             for (uint256 i = 0; i < stableTokenPairs.length(); i++) {
                 address pair = stableTokenPairs.at(i);
-                uint256 pairLiquidity = getStableTokenLiquidity(
-                    pair,
-                    avaxStableTokenConversionRatio
-                );
+                uint256 pairLiquidity = 1;
                 uint256 weightedLiquidity = pairLiquidity.mul(weights[pair]);
                 distribution[
                     i + avaxPairs.length() + partyPairs.length()
