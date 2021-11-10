@@ -1,5 +1,5 @@
 const TreasuryVester = artifacts.require("TreasuryVester");
-const LiquidityPoolManager = artifacts.require("LiquidityPoolManager");
+const BoostedLiquidityPoolManager = artifacts.require("BoostedLiquidityPoolManager");
 
 const PARTY = '0xCEAA8d36a189b3d8b867AD534D91A3Bdbd31686b'; //FUJI-v2
 // const PARTY = '0x25afD99fcB474D7C336A2971F26966da652a92bc'; //MAINNET-v2
@@ -15,7 +15,7 @@ const STABLETOKEN = '0x2058ec2791dD28b6f67DB836ddf87534F4Bbdf22'; //FUJISTABLE A
 module.exports = function (deployer) {
   deployer.deploy(TreasuryVester, PARTY).then(
     () => {
-      return deployer.deploy(LiquidityPoolManager, WAVAX, PARTY, STABLETOKEN, TreasuryVester.address)
+      return deployer.deploy(BoostedLiquidityPoolManager, WAVAX, PARTY, STABLETOKEN, TreasuryVester.address)
     }
   );
 };
