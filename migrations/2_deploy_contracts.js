@@ -1,4 +1,5 @@
 const TreasuryVester = artifacts.require("TreasuryVester");
+const AdjustedTreasuryVester = artifacts.require("AdjustedTreasuryVester");
 const LiquidityPoolManager = artifacts.require("LiquidityPoolManager");
 const BoostedLiquidityPoolManager = artifacts.require("BoostedLiquidityPoolManager");
 
@@ -12,14 +13,14 @@ const STABLETOKEN = '0x2058ec2791dD28b6f67DB836ddf87534F4Bbdf22'; //FUJISTABLE A
 // const STABLETOKEN = '0xc7198437980c041c805A1EDcbA50c1Ce5db95118'; //USDT.e
 
 
-// Just use this if deploying entire solution
-// module.exports = function (deployer) {
-//   deployer.deploy(TreasuryVester, PARTY).then(
-//     () => {
-//       return deployer.deploy(BoostedLiquidityPoolManager, WAVAX, PARTY, STABLETOKEN, TreasuryVester.address)
-//     }
-//   );
-// };
+// Just use this if deploying entire boosted solution
+module.exports = function (deployer) {
+  deployer.deploy(AdjustedTreasuryVester, PARTY).then(
+    () => {
+      return deployer.deploy(BoostedLiquidityPoolManager, WAVAX, PARTY, STABLETOKEN, AdjustedTreasuryVester.address)
+    }
+  );
+};
 
 // Just use this when deploying a new vester
 // module.exports = function (deployer) {
@@ -27,9 +28,9 @@ const STABLETOKEN = '0x2058ec2791dD28b6f67DB836ddf87534F4Bbdf22'; //FUJISTABLE A
 // };
 
 // Just use this if deploying an LPM with an existing Vester
-const TREASURY_VESTER_ADDRESS = '0x28Cf21Fc82525146E6A2dE1459e673dAF493F88f'; //FUJI
+// const TREASURY_VESTER_ADDRESS = '0x28Cf21Fc82525146E6A2dE1459e673dAF493F88f'; //FUJI
 // const TREASURY_VESTER_ADDRESS = '0x3af549E2a3de76b15399FaADef6Fe118c62f8dB5'; //MAINNET
 
-module.exports = function (deployer) {
-  deployer.deploy(BoostedLiquidityPoolManager, WAVAX, PARTY, STABLETOKEN, TREASURY_VESTER_ADDRESS)
-};
+// module.exports = function (deployer) {
+//   deployer.deploy(BoostedLiquidityPoolManager, WAVAX, PARTY, STABLETOKEN, TREASURY_VESTER_ADDRESS)
+// };
