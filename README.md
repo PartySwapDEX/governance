@@ -6,10 +6,6 @@ Replacing 'TreasuryVester'
 
 ---
 
-Replacing 'TreasuryVester'
-
----
-
 - transaction hash: 0x9d33cf32f3b922fc01aafd0b03ea3ad23148539277331d929052fbddd7192a13
 - Blocks: 2 Seconds: 5
 - contract address: 0x3af549E2a3de76b15399FaADef6Fe118c62f8dB5
