@@ -1,3 +1,37 @@
+# BOOSTED
+
+Deploying 'AdjustedTreasuryVester'
+
+---
+
+- transaction hash: 0xfab0195f46a2d13e9fb60b221dc0d0348b68f4728f98a0eafccfe322573dbe66
+- Blocks: 1 Seconds: 6
+- contract address: 0xD0f7E41532C554612B9Ef1951aB84770F2fa32Fd
+- block number: 2476115
+- block timestamp: 1636740910
+- account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
+- balance: 9.332364685252245417
+- gas used: 1050904 (0x100918)
+- gas price: 225 gwei
+- value sent: 0 ETH
+- total cost: 0.2364534 ETH
+
+Deploying 'BoostedLiquidityPoolManager'
+
+---
+
+- transaction hash: 0x877ffaa7de27aedc32898dd9349c1302a7a374b541aa5bc67a7a5d0da0210805
+- Blocks: 4 Seconds: 9
+- contract address: 0xd52A4e73d1bCf4b056C805b4B2f5a5324C679b9d
+- block number: 2476119
+- block timestamp: 1636740928
+- account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
+- balance: 8.367370285252245417
+- gas used: 4288864 (0x417160)
+- gas price: 225 gwei
+- value sent: 0 ETH
+- total cost: 0.9649944 ETH
+
 # V2
 
 ## MAIN
