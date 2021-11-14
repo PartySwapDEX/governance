@@ -39,7 +39,7 @@ contract AdjustedTreasuryVester is Ownable, ReentrancyGuard {
 
     // Amount of PARTY required to start distributing denominated in wei
     // Should be 394,801 PARTY - just for deployment days
-    uint256 public startingBalance = 394_801_000_000_000_000_000_000;
+    uint256 public startingBalance = 131_601_000_000_000_000_000_000;
 
     event VestingEnabled();
     event TokensVested(uint256 amount, address recipient);
