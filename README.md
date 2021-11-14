@@ -1,4 +1,40 @@
-# BOOSTED
+# BOOSTED MAIN
+
+Replacing 'AdjustedTreasuryVester'
+
+---
+
+- transaction hash: 0x32f54f392903ae0ed1937b89709ad101cc6280995eea03f59536b3c16b5baddc
+- Blocks: 1 Seconds: 4
+- contract address: 0x7e93A3f34A6a6FB09184Bb3cF0E4269FB88bb8A2
+- block number: 6947945
+- block timestamp: 1636917454
+- account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
+- balance: 2.749331051170049813
+- gas used: 1050904 (0x100918)
+- gas price: 225 gwei
+- value sent: 0 ETH
+- total cost: 0.2364534 ETH
+
+Replacing 'BoostedLiquidityPoolManager'
+
+---
+
+- transaction hash: 0x9d91576ceae17fa8d8a9d01bf1c57dd2071c0f704124a7d79db587719311ddc3
+- Blocks: 0 Seconds: 0
+- contract address: 0x76b411c884838CbCb3A58d02E7b386EA037b6161
+- block number: 6947949
+- block timestamp: 1636917460
+- account: 0x3b73F15142945f260148aDa3Db15b0657D12831C
+- balance: 1.784336651170049813
+- gas used: 4288864 (0x417160)
+- gas price: 225 gwei
+- value sent: 0 ETH
+- total cost: 0.9649944 ETH
+
+---
+
+# BOOSTED FUJI
 
 Deploying 'AdjustedTreasuryVester'
 
