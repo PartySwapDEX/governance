@@ -15,8 +15,11 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
     "@partyswap-libs/party-swap-core": "^0.1.3",
+    "@poanet/solidity-flattener": "^3.0.6",
     "@truffle/hdwallet-provider": "^1.4.3",
     "dotenv": "^10.0.0",
+    "glob": "^7.2.0",
+    "glob-promise": "^4.2.2",
     "openzeppelin-solidity": "^4.1.0"
   }
 }
